@@ -24,4 +24,7 @@ dist-ssr
 *.sw?
 
 #Pass
-.env.env
+# Variables de entorno — nunca subir a GitHub
+.env
+.env.local
+.env*.local
