@@ -34,28 +34,34 @@ function AppContent() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    //Obtener la sesion actual al recargar la pagina
+    // Verificamos si hay token de nuestra API en localStorage
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (token && user) {
+      // Si hay token propio → usuario logueado con email/contraseña
+      setSession({ type: "api", token, user: JSON.parse(user) });
+      setLoading(false);
+      return;
+    }
+
+    // Si no hay token propio → verificamos sesión de Supabase (Google)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+      if (session) {
+        setSession({ type: "supabase", ...session });
+      }
       setLoading(false);
     });
 
-    // Escuchar cambios de sesión en tiempo real
-    // Aquí detectamos cuando Google OAuth completa el redirect
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-
-      // SIGNED_IN se dispara cuando:
-      // 1. El usuario inicia sesión con email/contraseña
-      // 2. Google OAuth completa el redirect y vuelve a la app
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" && session) {
+        setSession({ type: "supabase", ...session });
         navigate("/dashboard");
       }
-
-      // SIGNED_OUT se dispara cuando el usuario cierra sesión
       if (event === "SIGNED_OUT") {
+        setSession(null);
         navigate("/login");
       }
     });

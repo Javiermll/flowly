@@ -10,6 +10,11 @@ export default function Navbar({ session }) {
   }, [dark]);
 
   const handleSignOut = async () => {
+    // Limpiamos el localStorage si era sesion de nuestra API
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    //Cerramos sesion de supabase su era google
     await supabase.auth.signOut();
   };
 

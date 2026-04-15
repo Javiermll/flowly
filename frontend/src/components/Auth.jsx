@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
+import { api } from "../lib/api";
 
 // Componente interno
 
@@ -24,16 +25,22 @@ export default function Auth() {
     setLoading(true);
     setMessage("");
 
-    if (isLogin) {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) setMessage(error.message);
-    } else {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) setMessage(error.message);
-      else setMessage("Revisa tu email para confirmar tu cuenta.");
+    try {
+      // Usamos nuestra API propia en vez de Supabase
+      const data = isLogin
+        ? await api.login(email, password)
+        : await api.register(email, password);
+
+      // Guardamos el token en localStorage
+      // Así persiste aunque el usuario recargue la página
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Recargamos la página para que App.jsx detecte el token
+      window.location.href = "/dashboard";
+    } catch (error) {
+      // El error viene del throw new Error() en api.js
+      setMessage(error.message);
     }
 
     setLoading(false);
@@ -102,7 +109,7 @@ export default function Auth() {
           <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
         </div>
 
-        {/* Formulario email */}
+        {/* Formulario email - Ahora conectado a mi API */}
         <form onSubmit={handleEmailAuth} className="space-y-4">
           <input
             type="email"
