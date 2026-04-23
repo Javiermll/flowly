@@ -1,22 +1,12 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
 
-export default function Navbar({ session }) {
+export default function Navbar({ session, onSignOut }) {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
-
-  const handleSignOut = async () => {
-    // Limpiamos el localStorage si era sesion de nuestra API
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    //Cerramos sesion de supabase su era google
-    await supabase.auth.signOut();
-  };
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
@@ -63,7 +53,7 @@ export default function Navbar({ session }) {
         <div className="flex items-center gap-3">
           {session ? (
             <button
-              onClick={handleSignOut}
+              onClick={onSignOut}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               Cerrar sesión

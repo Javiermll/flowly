@@ -69,6 +69,14 @@ function AppContent() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleSignOut = async () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    await supabase.auth.signOut();
+    setSession(null);
+    navigate("/login");
+  };
+
   // Cargando — muestra spinner
   if (loading) {
     return (
@@ -86,7 +94,7 @@ function AppContent() {
         path="/"
         element={
           <div className="bg-white dark:bg-gray-950 min-h-screen transition-colors duration-300">
-            <Navbar session={session} />
+            <Navbar session={session} onSignOut={handleSignOut} />
             <Hero />
             <Logos />
             <Features />
@@ -124,7 +132,7 @@ function AppContent() {
         element={
           <ProtectedRoute session={session}>
             <div className="bg-white dark:bg-gray-950 min-h-screen transition-colors duration-300">
-              <Navbar session={session} />
+              <Navbar session={session} onSignOut={handleSignOut} />
               <Dashboard session={session} />
             </div>
           </ProtectedRoute>
